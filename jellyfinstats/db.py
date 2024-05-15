@@ -60,12 +60,15 @@ class LibraryDb:
         re = cur.fetchone()
         return dict(re) if re is not None else None
 
-    def get_audios(self, track: str, album: str = None):
-        args = ['Audio', track]
+    def get_audios(self, track: str = None, album: str = None):
+        args = ['MediaBrowser.Controller.Entities.Audio.Audio']
         where_sql = ''
+        if track is not None:
+            where_sql += ' AND Name = ?'
+            args.append(track)
         if album is not None:
-            where_sql = ' AND Album = ?'
+            where_sql += ' AND Album = ?'
             args.append(album)
-        cur = self._db.execute(f"SELECT * FROM TypedBaseItems WHERE MediaType = ? AND Name = ?{where_sql};", args)  # noqa: E501
+        cur = self._db.execute(f"SELECT * FROM TypedBaseItems WHERE type = ?{where_sql};", args)  # noqa: E501
         cur.row_factory = sqlite3.Row
         return [dict(i) for i in cur.fetchall()]

@@ -1,0 +1,152 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR lifegpc
+# This file is distributed under the same license as the jellyfinStats package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: jellyfinStats 1.0\n"
+"Report-Msgid-Bugs-To: root@lifegpc.com\n"
+"POT-Creation-Date: 2024-05-15 13:56+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: __main__.py:10
+msgid "The path to config file."
+msgstr ""
+
+#: __main__.py:11
+msgid "The path to playback_reporting.db"
+msgstr ""
+
+#: __main__.py:12
+msgid "The path to library.db"
+msgstr ""
+
+#: __main__.py:13
+msgid "The path to jellyfin data directory."
+msgstr ""
+
+#: __main__.py:14
+msgid "The directory for output files."
+msgstr ""
+
+#: __main__.py:15
+msgid "Specify maximum items to display in one page."
+msgstr ""
+
+#: audio.py:15 audio.py:35
+msgid "Album: "
+msgstr ""
+
+#: audio.py:17
+msgid "Artists: "
+msgstr ""
+
+#: audio.py:19 audio.py:37
+msgid "Album artists: "
+msgstr ""
+
+#: audio.py:33
+msgid "Original item: "
+msgstr ""
+
+#: audio.py:40 audio.py:77
+msgid "Please choose audio item:"
+msgstr ""
+
+#: audio.py:40 audio.py:48 audio.py:74
+msgid "No item"
+msgstr ""
+
+#: audio.py:40
+msgid "Choose other items"
+msgstr ""
+
+#: audio.py:48
+msgid "Input item id"
+msgstr ""
+
+#: audio.py:48
+msgid "Input track name"
+msgstr ""
+
+#: audio.py:48
+msgid "Input album name"
+msgstr ""
+
+#: audio.py:50 audio.py:76
+msgid "Choose in given choices"
+msgstr ""
+
+#: audio.py:51
+msgid "Please choose action: "
+msgstr ""
+
+#: audio.py:64
+msgid "Please input item id:"
+msgstr ""
+
+#: audio.py:69
+msgid "Item not found."
+msgstr ""
+
+#: audio.py:74
+msgid "Back"
+msgstr ""
+
+#: audio.py:85
+msgid "Items not found."
+msgstr ""
+
+#: audio.py:89
+msgid "Please input track name:"
+msgstr ""
+
+#: audio.py:94
+msgid "Please input album name:"
+msgstr ""
+
+#: cache.py:23
+msgid "Unsupported version: "
+msgstr ""
+
+#: cache.py:29
+msgid "Failed to load cache."
+msgstr ""
+
+#: config.py:40 config.py:51
+#, python-format
+msgid "%s not set."
+msgstr ""
+
+#: utils.py:6
+msgid "Please choose: "
+msgstr ""
+
+#: utils.py:23
+#, python-format
+msgid "Page %i/%i"
+msgstr ""
+
+#: utils.py:31
+msgid "First page"
+msgstr ""
+
+#: utils.py:33
+msgid "Previous page"
+msgstr ""
+
+#: utils.py:36
+msgid "Next page"
+msgstr ""
+
+#: utils.py:38
+msgid "Last page"
+msgstr ""

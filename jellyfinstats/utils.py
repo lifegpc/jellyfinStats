@@ -1,6 +1,11 @@
 from math import ceil
+from datetime import datetime, timezone
+from re import compile
 from . import _
 from .config import Config
+
+
+DATETIME_RE = compile(r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}).(\d{0,6})')  # noqa: E501
 
 
 def ask_choice(cfg: Config, choices: list, prompt=_("Please choose: "),
@@ -66,3 +71,19 @@ def ask_choice(cfg: Config, choices: list, prompt=_("Please choose: "),
             if index < 0 or index >= count:
                 continue
             return choices[index]
+
+
+def format_time(time: float | None = None, tz=timezone.utc) -> str:
+    d = datetime.fromtimestamp(time, tz=tz)
+    return d.strftime('%Y-%m-%d %H:%M:%S.%f')
+
+
+def parse_time(time: str) -> float:
+    re = DATETIME_RE.match(time)
+    t = datetime(int(re[1]), int(re[2]), int(re[3]), int(re[4]), int(re[5]), int(re[6]), int(re[7].ljust(6, '0')), timezone.utc)  # noqa: E501
+    return t.timestamp()
+
+
+def convert_uid(uid: str) -> str:
+    t = uid.upper()
+    return f"{t[:8]}-{t[8:12]}-{t[12:16]}-{t[16:20]}-{t[20:]}"

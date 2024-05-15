@@ -58,6 +58,17 @@ class Config:
             return self._data['jellyfin_data_dir']
 
     @cached_property
+    def jellyfin_db(self) -> str:
+        if self._args and self._args.jellyfin_db:
+            return self._args.jellyfin_db
+        if 'jellyfin_db' in self._data and self._data['jellyfin_db']:
+            return self._data['jellyfin_db']
+        d = self.jellyfin_data_dir
+        if d:
+            return join(d, "jellyfin.db")
+        raise ValueError(_('%s not set.') % ('jellyfin_db'))
+
+    @cached_property
     def output_dir(self) -> str:
         if self._args and self._args.output_dir:
             return self._args.output_dir

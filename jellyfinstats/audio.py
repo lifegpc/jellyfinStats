@@ -1,9 +1,13 @@
 from . import _
 from .cache import IdRelativeCache
 from .config import Config
+from .csv import CSVFile
 from .db import PlaybackReportingDb, LibraryDb
-from .utils import ask_choice
+from .utils import ask_choice, parse_time
+from datetime import datetime
 from re import compile
+from os import makedirs
+from os.path import join
 
 
 ITEMNAME_PATTERN = compile(r'(?P<album_artist>.*) - (?P<track>.*) \((?P<album>.*)\)')  # noqa: E501
@@ -108,40 +112,41 @@ class AudioSelector:
         return self.re
 
 
-def generate_audio_report(pdb: PlaybackReportingDb, ldb: LibraryDb,
-                          icache: IdRelativeCache, cfg: Config):
+def prepare_audio_map(pdb: PlaybackReportingDb, ldb: LibraryDb,
+                      icache: IdRelativeCache, cfg: Config):
     offset = 0
     data = pdb.get_activitys(offset, itemType='Audio')
-    count = 0
     re = None
     itemMap = {}
-    itemList = {}
+    rowMap = {}
     while len(data) > 0:
         for d in data:
             itemId = d['ItemId']
+            rowid = d['rowid']
             item = ldb.get_item(itemId)
             if not item:
                 re = icache.get(itemId)
-                if re:
+                if re and isinstance(re, str):
+                    if re == 'no_track':
+                        if itemId in itemMap:
+                            rowMap[rowid] = itemId
+                        else:
+                            itemMap[itemId] = d
+                            rowMap[rowid] = itemId
+                        continue
+                    re = None
+                elif re:
                     item = ldb.get_item(re['id'])
-                    if item and isinstance(item, str):
-                        if item == 'no_track':
-                            if itemId in itemMap:
-                                itemList[itemId].append(d)
-                            else:
-                                itemMap[itemId] = d
-                                itemList[itemId] = [d]
-                            continue
-                    elif item and item['PresentationUniqueKey'] in itemMap:
-                        itemList[item['PresentationUniqueKey']].append(d)
+                    if item and item['PresentationUniqueKey'] in itemMap:
+                        rowMap[rowid] = item['PresentationUniqueKey']
                         continue
                 else:
                     if itemId in itemMap:
-                        itemList[itemId].append(d)
+                        rowMap[rowid] = itemId
                         continue
             else:
                 if itemId in itemMap:
-                    itemList[itemId].append(d)
+                    rowMap[rowid] = itemId
                     continue
             if not item:
                 itemName = d['ItemName']
@@ -173,12 +178,52 @@ def generate_audio_report(pdb: PlaybackReportingDb, ldb: LibraryDb,
             if item:
                 itemId = item['PresentationUniqueKey']
                 itemMap[itemId] = item
-                itemList[itemId] = [d]
+                rowMap[rowid] = itemId
             else:
-                print(d)
                 itemMap[itemId] = d
-                itemList[itemId] = [d]
-                count += 1
+                rowMap[rowid] = itemId
         offset += len(data)
         data = pdb.get_activitys(offset, itemType='Audio')
-    print('Count', count)
+    return itemMap, rowMap
+
+
+def generate_audio_report(pdb: PlaybackReportingDb, itemMap, rowMap,
+                          output: str, userId: str = None,
+                          startTime: float = None, endTime: float = None):
+    makedirs(output, exist_ok=True)
+    offset = 0
+    data = pdb.get_activitys(offset, itemType='Audio', userId=userId,
+                             startTime=startTime, endTime=endTime)
+    with CSVFile(join(output, "history.csv")) as his:
+        his.write(_("Id"), _("Date"), _("Time"), _("Name"), _("Artists"), _("Album"), _("Album artists"), _("Original item id"), _("Item id"), _("Play Duration"), _("Record content"), _("Client name"), _("Device name"), _("Playback method"))  # noqa: E501
+        while len(data) > 0:
+            for i in data:
+                rowid = i['rowid']
+                itemId = rowMap[rowid]
+                created = datetime.fromtimestamp(parse_time(i['DateCreated']),
+                                                 None)
+                date = created.strftime("%Y-%m-%d")
+                time = created.strftime("%H:%M:%S.%f")
+                item = itemMap[itemId]
+                name = ''
+                artists = ''
+                album = ''
+                album_artists = ''
+                original_item_id = i['ItemId']
+                play_duration = i['PlayDuration']
+                if 'type' in item:
+                    name = item['Name']
+                    artists = item['Artists']
+                    album = item['Album']
+                    album_artists = item['AlbumArtists']
+                else:
+                    it = ITEMNAME_PATTERN.match(item['ItemName']).groupdict()
+                    name = it['track']
+                    if it['album'] != 'Not Known':
+                        album = it['album']
+                    if it['album_artist'] != "Not Known":
+                        album_artists = it['album_artist']
+                his.write(rowid, date, time, name, artists, album, album_artists, original_item_id, itemId, play_duration, i['ItemName'], i['ClientName'], i['DeviceName'], i['PlaybackMethod'])  # noqa: E501
+            offset += len(data)
+            data = pdb.get_activitys(offset, itemType='Audio', userId=userId,
+                                     startTime=startTime, endTime=endTime)

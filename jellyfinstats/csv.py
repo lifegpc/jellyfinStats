@@ -58,7 +58,9 @@ def writeField(f: IO[bytes], *k):
             f.write(b',')
         else:
             a = True
-        if isinstance(i, bool):
+        if i is None:
+            i = ''
+        elif isinstance(i, bool):
             i = str(int(i))
         elif isinstance(i, Enum):
             i = str(i.value)

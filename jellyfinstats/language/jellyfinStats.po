@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: jellyfinStats 1.0\n"
 "Report-Msgid-Bugs-To: root@lifegpc.com\n"
-"POT-Creation-Date: 2024-05-15 13:56+0800\n"
+"POT-Creation-Date: 2024-05-16 10:47+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,100 +17,188 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: __main__.py:10
+#: __main__.py:20
 msgid "The path to config file."
 msgstr ""
 
-#: __main__.py:11
+#: __main__.py:21
 msgid "The path to playback_reporting.db"
 msgstr ""
 
-#: __main__.py:12
+#: __main__.py:22
 msgid "The path to library.db"
 msgstr ""
 
-#: __main__.py:13
+#: __main__.py:23
 msgid "The path to jellyfin data directory."
 msgstr ""
 
-#: __main__.py:14
+#: __main__.py:24
 msgid "The directory for output files."
 msgstr ""
 
-#: __main__.py:15
+#: __main__.py:25
 msgid "Specify maximum items to display in one page."
 msgstr ""
 
-#: audio.py:15 audio.py:35
+#: __main__.py:26
+msgid "The path to jellyfin.db"
+msgstr ""
+
+#: audio.py:22 audio.py:42
 msgid "Album: "
 msgstr ""
 
-#: audio.py:17
+#: audio.py:24
 msgid "Artists: "
 msgstr ""
 
-#: audio.py:19 audio.py:37
+#: audio.py:26 audio.py:44
 msgid "Album artists: "
 msgstr ""
 
-#: audio.py:33
+#: audio.py:40
 msgid "Original item: "
 msgstr ""
 
-#: audio.py:40 audio.py:77
+#: audio.py:47 audio.py:84
 msgid "Please choose audio item:"
 msgstr ""
 
-#: audio.py:40 audio.py:48 audio.py:74
+#: audio.py:47 audio.py:55 audio.py:81
 msgid "No item"
 msgstr ""
 
-#: audio.py:40
+#: audio.py:47
 msgid "Choose other items"
 msgstr ""
 
-#: audio.py:48
+#: audio.py:55
 msgid "Input item id"
 msgstr ""
 
-#: audio.py:48
+#: audio.py:55
 msgid "Input track name"
 msgstr ""
 
-#: audio.py:48
+#: audio.py:55
 msgid "Input album name"
 msgstr ""
 
-#: audio.py:50 audio.py:76
+#: audio.py:57 audio.py:83
 msgid "Choose in given choices"
 msgstr ""
 
-#: audio.py:51
+#: audio.py:58
 msgid "Please choose action: "
 msgstr ""
 
-#: audio.py:64
+#: audio.py:71
 msgid "Please input item id:"
 msgstr ""
 
-#: audio.py:69
+#: audio.py:76
 msgid "Item not found."
 msgstr ""
 
-#: audio.py:74
+#: audio.py:81
 msgid "Back"
 msgstr ""
 
-#: audio.py:85
+#: audio.py:92
 msgid "Items not found."
 msgstr ""
 
-#: audio.py:89
+#: audio.py:96
 msgid "Please input track name:"
 msgstr ""
 
-#: audio.py:94
+#: audio.py:101
 msgid "Please input album name:"
+msgstr ""
+
+#: audio.py:240
+msgid "Id"
+msgstr ""
+
+#: audio.py:240
+msgid "Date"
+msgstr ""
+
+#: audio.py:240
+msgid "Time"
+msgstr ""
+
+#: audio.py:240 audio.py:290
+msgid "Name"
+msgstr ""
+
+#: audio.py:240 audio.py:290
+msgid "Artists"
+msgstr ""
+
+#: audio.py:240
+msgid "Album"
+msgstr ""
+
+#: audio.py:240 audio.py:290
+msgid "Album artists"
+msgstr ""
+
+#: audio.py:240 audio.py:290
+msgid "Duration"
+msgstr ""
+
+#: audio.py:240 audio.py:290
+msgid "(seconds)"
+msgstr ""
+
+#: audio.py:240
+msgid "Original item id"
+msgstr ""
+
+#: audio.py:240 audio.py:290
+msgid "Item id"
+msgstr ""
+
+#: audio.py:240 audio.py:290
+msgid "Play duration"
+msgstr ""
+
+#: audio.py:240
+msgid "Record content"
+msgstr ""
+
+#: audio.py:240
+msgid "Client name"
+msgstr ""
+
+#: audio.py:240
+msgid "Device name"
+msgstr ""
+
+#: audio.py:240
+msgid "Playback method"
+msgstr ""
+
+#: audio.py:240 audio.py:290
+msgid "Play count"
+msgstr ""
+
+#: audio.py:290
+msgid "Record count"
+msgstr ""
+
+#: audio.py:290
+msgid "Year"
+msgstr ""
+
+#: audio.py:290
+msgid "Publish date"
+msgstr ""
+
+#: audio.py:290
+msgid "Publisher"
 msgstr ""
 
 #: cache.py:23
@@ -121,32 +209,37 @@ msgstr ""
 msgid "Failed to load cache."
 msgstr ""
 
-#: config.py:40 config.py:51
+#: config.py:40 config.py:51 config.py:69
 #, python-format
 msgid "%s not set."
 msgstr ""
 
-#: utils.py:6
+#: utils.py:11
 msgid "Please choose: "
 msgstr ""
 
-#: utils.py:23
+#: utils.py:28
 #, python-format
 msgid "Page %i/%i"
 msgstr ""
 
-#: utils.py:31
+#: utils.py:36
 msgid "First page"
 msgstr ""
 
-#: utils.py:33
+#: utils.py:38
 msgid "Previous page"
 msgstr ""
 
-#: utils.py:36
+#: utils.py:41
 msgid "Next page"
 msgstr ""
 
-#: utils.py:38
+#: utils.py:43
 msgid "Last page"
+msgstr ""
+
+#: utils.py:97
+#, python-format
+msgid "%i day"
 msgstr ""

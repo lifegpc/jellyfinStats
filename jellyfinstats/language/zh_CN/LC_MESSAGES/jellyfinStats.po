@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: jellyfinStats 1.0\n"
 "Report-Msgid-Bugs-To: root@lifegpc.com\n"
-"POT-Creation-Date: 2024-05-15 13:56+0800\n"
+"POT-Creation-Date: 2024-05-16 10:47+0800\n"
 "PO-Revision-Date: 2024-05-15 10:20+0800\n"
 "Last-Translator: mhy <root@lifegpc.com>\n"
 "Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
@@ -16,101 +16,189 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: __main__.py:10
+#: __main__.py:20
 msgid "The path to config file."
 msgstr "配置文件位置。"
 
-#: __main__.py:11
+#: __main__.py:21
 msgid "The path to playback_reporting.db"
 msgstr "playback_reporting.db 文件位置。"
 
-#: __main__.py:12
+#: __main__.py:22
 msgid "The path to library.db"
 msgstr "library.db 文件位置。"
 
-#: __main__.py:13
+#: __main__.py:23
 msgid "The path to jellyfin data directory."
 msgstr "Jellyfin 数据目录位置。"
 
-#: __main__.py:14
+#: __main__.py:24
 msgid "The directory for output files."
 msgstr "输出目录位置。"
 
-#: __main__.py:15
+#: __main__.py:25
 msgid "Specify maximum items to display in one page."
 msgstr "指定一页可以显示的最大条目数。"
 
-#: audio.py:15 audio.py:35
+#: __main__.py:26
+msgid "The path to jellyfin.db"
+msgstr "jellyfin.db 文件位置。"
+
+#: audio.py:22 audio.py:42
 msgid "Album: "
 msgstr "专辑："
 
-#: audio.py:17
+#: audio.py:24
 msgid "Artists: "
 msgstr "艺术家："
 
-#: audio.py:19 audio.py:37
+#: audio.py:26 audio.py:44
 msgid "Album artists: "
 msgstr "专辑艺术家："
 
-#: audio.py:33
+#: audio.py:40
 msgid "Original item: "
 msgstr "原项目："
 
-#: audio.py:40 audio.py:77
+#: audio.py:47 audio.py:84
 msgid "Please choose audio item:"
 msgstr "请选择音乐项目："
 
-#: audio.py:40 audio.py:48 audio.py:74
+#: audio.py:47 audio.py:55 audio.py:81
 msgid "No item"
 msgstr "无对应项目"
 
-#: audio.py:40
+#: audio.py:47
 msgid "Choose other items"
 msgstr "选择其他项目"
 
-#: audio.py:48
+#: audio.py:55
 msgid "Input item id"
 msgstr "输入项目ID"
 
-#: audio.py:48
+#: audio.py:55
 msgid "Input track name"
 msgstr "输入标题"
 
-#: audio.py:48
+#: audio.py:55
 msgid "Input album name"
 msgstr "输入专辑名称"
 
-#: audio.py:50 audio.py:76
+#: audio.py:57 audio.py:83
 msgid "Choose in given choices"
 msgstr "从给出的选项中选择"
 
-#: audio.py:51
+#: audio.py:58
 msgid "Please choose action: "
 msgstr "请选择方式："
 
-#: audio.py:64
+#: audio.py:71
 msgid "Please input item id:"
 msgstr "请输入项目ID："
 
-#: audio.py:69
+#: audio.py:76
 msgid "Item not found."
 msgstr "没有找到项目。"
 
-#: audio.py:74
+#: audio.py:81
 msgid "Back"
 msgstr "返回"
 
-#: audio.py:85
+#: audio.py:92
 msgid "Items not found."
 msgstr "没有找到项目。"
 
-#: audio.py:89
+#: audio.py:96
 msgid "Please input track name:"
 msgstr "请输入标题："
 
-#: audio.py:94
+#: audio.py:101
 msgid "Please input album name:"
 msgstr "请输入专辑名称："
+
+#: audio.py:240
+msgid "Id"
+msgstr "ID"
+
+#: audio.py:240
+msgid "Date"
+msgstr "日期"
+
+#: audio.py:240
+msgid "Time"
+msgstr "时间"
+
+#: audio.py:240 audio.py:290
+msgid "Name"
+msgstr "名称"
+
+#: audio.py:240 audio.py:290
+msgid "Artists"
+msgstr "艺术家"
+
+#: audio.py:240
+msgid "Album"
+msgstr "专辑"
+
+#: audio.py:240 audio.py:290
+msgid "Album artists"
+msgstr "专辑艺术家"
+
+#: audio.py:240 audio.py:290
+msgid "Duration"
+msgstr "时长"
+
+#: audio.py:240 audio.py:290
+msgid "(seconds)"
+msgstr "（秒）"
+
+#: audio.py:240
+msgid "Original item id"
+msgstr "原项目ID"
+
+#: audio.py:240 audio.py:290
+msgid "Item id"
+msgstr "项目ID"
+
+#: audio.py:240 audio.py:290
+msgid "Play duration"
+msgstr "播放时长"
+
+#: audio.py:240
+msgid "Record content"
+msgstr "记录内容"
+
+#: audio.py:240
+msgid "Client name"
+msgstr "客户端名称"
+
+#: audio.py:240
+msgid "Device name"
+msgstr "设备名称"
+
+#: audio.py:240
+msgid "Playback method"
+msgstr "播放方式"
+
+#: audio.py:240 audio.py:290
+msgid "Play count"
+msgstr "播放次数"
+
+#: audio.py:290
+msgid "Record count"
+msgstr "记录次数"
+
+#: audio.py:290
+msgid "Year"
+msgstr "年份"
+
+#: audio.py:290
+msgid "Publish date"
+msgstr "发布日期"
+
+#: audio.py:290
+msgid "Publisher"
+msgstr "发布者"
 
 #: cache.py:23
 msgid "Unsupported version: "
@@ -120,32 +208,37 @@ msgstr "不支持的版本："
 msgid "Failed to load cache."
 msgstr "加载缓存失败。"
 
-#: config.py:40 config.py:51
+#: config.py:40 config.py:51 config.py:69
 #, python-format
 msgid "%s not set."
 msgstr "%s 未设置。"
 
-#: utils.py:6
+#: utils.py:11
 msgid "Please choose: "
 msgstr "请选择："
 
-#: utils.py:23
+#: utils.py:28
 #, python-format
 msgid "Page %i/%i"
 msgstr "第%i/%i页"
 
-#: utils.py:31
+#: utils.py:36
 msgid "First page"
 msgstr "第一页"
 
-#: utils.py:33
+#: utils.py:38
 msgid "Previous page"
 msgstr "上一页"
 
-#: utils.py:36
+#: utils.py:41
 msgid "Next page"
 msgstr "下一页"
 
-#: utils.py:38
+#: utils.py:43
 msgid "Last page"
 msgstr "最后一页"
+
+#: utils.py:97
+#, python-format
+msgid "%i day"
+msgstr "%i 天"

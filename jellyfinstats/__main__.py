@@ -30,4 +30,4 @@ with PlaybackReportingDb(cfg.playback_reporting_db) as pdb:
                     output = join(cfg.output_dir, 'audio', username)
                     maxDate = u['MaxDate']
                     minDate = u['MinDate']
-                    generate_audio_report(pdb, re[0], re[1], output, userid)
+                    generate_audio_report(pdb, re[0], re[1], re[2], output, userid)

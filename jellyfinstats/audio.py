@@ -3,14 +3,17 @@ from .cache import IdRelativeCache
 from .config import Config
 from .csv import CSVFile
 from .db import PlaybackReportingDb, LibraryDb
-from .utils import ask_choice, parse_time
+from .utils import ask_choice, format_duration, parse_time
 from datetime import datetime
 from re import compile
 from os import makedirs
 from os.path import join
+from math import floor
 
 
 ITEMNAME_PATTERN = compile(r'(?P<album_artist>.*) - (?P<track>.*) \((?P<album>.*)\)')  # noqa: E501
+NOT_KNOWN = "Not Known"
+TIME_BASE = 10_000_000
 
 
 def print_item(item):
@@ -155,9 +158,9 @@ def prepare_audio_map(pdb: PlaybackReportingDb, ldb: LibraryDb,
                 if re is None:
                     raise ValueError(f"Failed to parse ItemName: {itemName}")
                 re = re.groupdict()
-                if re['album_artist'] == 'Not Known':
+                if re['album_artist'] == NOT_KNOWN:
                     re['album_artist'] = None
-                if re['album'] == 'Not Known':
+                if re['album'] == NOT_KNOWN:
                     re['album'] = None
                 items = ldb.get_audios(re['track'], re['album'])
                 if len(items) == 1:
@@ -184,18 +187,57 @@ def prepare_audio_map(pdb: PlaybackReportingDb, ldb: LibraryDb,
                 rowMap[rowid] = itemId
         offset += len(data)
         data = pdb.get_activitys(offset, itemType='Audio')
-    return itemMap, rowMap
+    albumMap = {}
+    for itemId in itemMap:
+        item = itemMap[itemId]
+        album = ''
+        album_artists = ''
+        if 'type' in item:
+            album = item['Album']
+            album_artists = item['AlbumArtists']
+        else:
+            it = ITEMNAME_PATTERN.match(item['ItemName']).groupdict()
+            if it['album'] != NOT_KNOWN:
+                album = it['album']
+            if it['album_artist'] != NOT_KNOWN:
+                album_artists = it['album_artist']
+        if album:
+            if album not in albumMap:
+                album_artists = album_artists if album_artists else None
+                items = ldb.get_albums(album, album_artists)
+                if len(items) == 0:
+                    items = ldb.get_albums(album)
+                if len(items) == 1:
+                    albumMap[album] = items[0]
+                elif len(items) > 1:
+                    print(len(items))
+                    raise NotImplementedError('FIX ME')
+                else:
+                    data = {'name': album}
+                    if 'type' in item:
+                        data['album_artists'] = item['AlbumArtists']
+                        data['date'] = item['PremiereDate']
+                        data['year'] = item['ProductionYear']
+                        data['publisher'] = item['Studios']
+                    else:
+                        data['album_artists'] = album_artists
+                        data['date'] = None
+                        data['year'] = None
+                        data['publisher'] = None
+                    albumMap[album] = data
+    return itemMap, rowMap, albumMap
 
 
-def generate_audio_report(pdb: PlaybackReportingDb, itemMap, rowMap,
+def generate_audio_report(pdb: PlaybackReportingDb, itemMap, rowMap, albumMap,
                           output: str, userId: str = None,
                           startTime: float = None, endTime: float = None):
     makedirs(output, exist_ok=True)
     offset = 0
     data = pdb.get_activitys(offset, itemType='Audio', userId=userId,
                              startTime=startTime, endTime=endTime)
+    albumCountMap = {}
     with CSVFile(join(output, "history.csv")) as his:
-        his.write(_("Id"), _("Date"), _("Time"), _("Name"), _("Artists"), _("Album"), _("Album artists"), _("Original item id"), _("Item id"), _("Play Duration"), _("Record content"), _("Client name"), _("Device name"), _("Playback method"))  # noqa: E501
+        his.write(_("Id"), _("Date"), _("Time"), _("Name"), _("Artists"), _("Album"), _("Album artists"), _("Duration"), _("Duration") + _("(seconds)"), _("Original item id"), _("Item id"), _("Play duration"), _("Play duration") + _("(seconds)"), _("Record content"), _("Client name"), _("Device name"), _("Playback method"), _("Play count"))  # noqa: E501
         while len(data) > 0:
             for i in data:
                 rowid = i['rowid']
@@ -211,19 +253,66 @@ def generate_audio_report(pdb: PlaybackReportingDb, itemMap, rowMap,
                 album_artists = ''
                 original_item_id = i['ItemId']
                 play_duration = i['PlayDuration']
+                duration = None
+                play_count = 1
                 if 'type' in item:
                     name = item['Name']
                     artists = item['Artists']
                     album = item['Album']
                     album_artists = item['AlbumArtists']
+                    duration = item['RunTimeTicks'] / 10_000_000
+                    play_count = floor(play_duration / duration)
+                    extrad = play_duration % duration
+                    if extrad > 60 or extrad > duration * 0.95:
+                        play_count += 1
                 else:
                     it = ITEMNAME_PATTERN.match(item['ItemName']).groupdict()
                     name = it['track']
-                    if it['album'] != 'Not Known':
+                    if it['album'] != NOT_KNOWN:
                         album = it['album']
-                    if it['album_artist'] != "Not Known":
+                    if it['album_artist'] != NOT_KNOWN:
                         album_artists = it['album_artist']
-                his.write(rowid, date, time, name, artists, album, album_artists, original_item_id, itemId, play_duration, i['ItemName'], i['ClientName'], i['DeviceName'], i['PlaybackMethod'])  # noqa: E501
+                his.write(rowid, date, time, name, artists, album, album_artists, format_duration(duration), duration, original_item_id, itemId, format_duration(play_duration), play_duration, i['ItemName'], i['ClientName'], i['DeviceName'], i['PlaybackMethod'], play_count)  # noqa: E501
+                if album:
+                    if album in albumCountMap:
+                        tmp = albumCountMap[album]
+                        tmp['count'] += 1
+                        tmp['play_count'] += play_count
+                        tmp['duration'] += play_duration
+                    else:
+                        albumCountMap[album] = {'count': 1,
+                                                'play_count': play_count,
+                                                'duration': play_duration}
             offset += len(data)
             data = pdb.get_activitys(offset, itemType='Audio', userId=userId,
                                      startTime=startTime, endTime=endTime)
+    with CSVFile(join(output, 'album.csv')) as al:
+        al.write(_("Name"), _("Album artists"), _("Artists"), _("Record count"), _("Play count"), _("Play duration"), _("Play duration") + _("(seconds)"), _("Duration"), _("Duration") + _("(seconds)"), _("Year"), _("Publish date"), _("Publisher"), _("Item id"))  # noqa: E501
+        for album in albumCountMap:
+            if album not in albumMap:
+                continue
+            item = albumMap[album]
+            album_artists = ''
+            artists = ''
+            count = albumCountMap[album]
+            duration = None
+            year = None
+            publisher = None
+            itemId = None
+            if 'type' in item:
+                album_artists = item['AlbumArtists']
+                artists = item['Artists']
+                duration = item['RunTimeTicks'] / TIME_BASE
+                year = item['ProductionYear']
+                date = item['PremiereDate']
+                publisher = item['Studios']
+                itemId = item['PresentationUniqueKey']
+            else:
+                album_artists = item['album_artists']
+                year = item['year']
+                date = item['date']
+                publisher = item['publisher']
+            if year and date:
+                if date.endswith("-01-01 00:00:00"):
+                    date = None
+            al.write(album, album_artists, artists, count['count'], count['play_count'], format_duration(count['duration']), count['duration'], format_duration(duration), duration, year, date, publisher, itemId)  # noqa: E501

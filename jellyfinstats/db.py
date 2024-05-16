@@ -97,6 +97,19 @@ class LibraryDb:
         cur.row_factory = sqlite3.Row
         return [dict(i) for i in cur.fetchall()]
 
+    def get_albums(self, album: str = None, albumArtists: str = None):
+        args = ['MediaBrowser.Controller.Entities.Audio.MusicAlbum']
+        where_sql = ''
+        if album is not None:
+            where_sql += ' AND Name = ?'
+            args.append(album)
+        if albumArtists is not None:
+            where_sql += ' AND AlbumArtists = ?'
+            args.append(albumArtists)
+        cur = self._db.execute(f"SELECT * FROM TypedBaseItems WHERE type = ?{where_sql};", args)  # noqa: E501
+        cur.row_factory = sqlite3.Row
+        return [dict(i) for i in cur.fetchall()]
+
 
 class JellyfinDb:
     def __init__(self, fn: str):

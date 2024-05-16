@@ -1,4 +1,4 @@
-from math import ceil
+from math import ceil, floor
 from datetime import datetime, timezone
 from re import compile
 from . import _
@@ -87,3 +87,19 @@ def parse_time(time: str) -> float:
 def convert_uid(uid: str) -> str:
     t = uid.upper()
     return f"{t[:8]}-{t[8:12]}-{t[12:16]}-{t[16:20]}-{t[20:]}"
+
+
+def format_duration(duration: float | None) -> str:
+    if duration is None:
+        return ''
+    duration = round(duration)
+    re = ''
+    if duration >= 86400:
+        re += _("%i day") % (floor(duration / 86400)) + " "
+        duration %= 86400
+    if duration >= 3600:
+        re += str(floor(duration / 3600)).rjust(2, "0") + ":"
+        duration %= 3600
+    min = str(floor(duration / 60)).rjust(2, "0")
+    sec = str(duration % 60).rjust(2, "0")
+    return f"{re}{min}:{sec}"

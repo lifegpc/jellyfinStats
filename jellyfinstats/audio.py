@@ -236,6 +236,9 @@ def generate_audio_report(pdb: PlaybackReportingDb, itemMap, rowMap, albumMap,
     data = pdb.get_activitys(offset, itemType='Audio', userId=userId,
                              startTime=startTime, endTime=endTime)
     albumCountMap = {}
+    trackCountMap = {}
+    artistCountMap = {}
+    alArtCountMap = {}
     with CSVFile(join(output, "history.csv")) as his:
         his.write(_("Id"), _("Date"), _("Time"), _("Name"), _("Artists"), _("Album"), _("Album artists"), _("Duration"), _("Duration") + _("(seconds)"), _("Original item id"), _("Item id"), _("Play duration"), _("Play duration") + _("(seconds)"), _("Record content"), _("Client name"), _("Device name"), _("Playback method"), _("Play count"))  # noqa: E501
         while len(data) > 0:
@@ -283,6 +286,43 @@ def generate_audio_report(pdb: PlaybackReportingDb, itemMap, rowMap, albumMap,
                         albumCountMap[album] = {'count': 1,
                                                 'play_count': play_count,
                                                 'duration': play_duration}
+                if itemId in trackCountMap:
+                    tmp = trackCountMap[itemId]
+                    tmp['count'] += 1
+                    tmp['play_count'] += play_count
+                    tmp['duration'] += play_duration
+                else:
+                    trackCountMap[itemId] = {'count': 1,
+                                             'play_count': play_count,
+                                             'duration': play_duration}
+                if artists:
+                    for art in artists.split("|"):
+                        ar = art.strip()
+                        if ar in artistCountMap:
+                            tmp = artistCountMap[ar]
+                            tmp['count'] += 1
+                            tmp['play_count'] += play_count
+                            tmp['duration'] += play_duration
+                        else:
+                            artistCountMap[ar] = {'count': 1,
+                                                  'play_count': play_count,
+                                                  'duration': play_duration}
+                if album_artists:
+                    if 'type' in item:
+                        arts = album_artists.split("|")
+                    else:
+                        arts = album_artists.split(",")
+                    for art in arts:
+                        ar = art.strip()
+                        if ar in alArtCountMap:
+                            tmp = alArtCountMap[ar]
+                            tmp['count'] += 1
+                            tmp['play_count'] += play_count
+                            tmp['duration'] += play_duration
+                        else:
+                            alArtCountMap[ar] = {'count': 1,
+                                                 'play_count': play_count,
+                                                 'duration': play_duration}
             offset += len(data)
             data = pdb.get_activitys(offset, itemType='Audio', userId=userId,
                                      startTime=startTime, endTime=endTime)
@@ -316,3 +356,52 @@ def generate_audio_report(pdb: PlaybackReportingDb, itemMap, rowMap, albumMap,
                 if date.endswith("-01-01 00:00:00"):
                     date = None
             al.write(album, album_artists, artists, count['count'], count['play_count'], format_duration(count['duration']), count['duration'], format_duration(duration), duration, year, date, publisher, itemId)  # noqa: E501
+    with CSVFile(join(output, 'track.csv')) as tr:
+        tr.write(_("Name"), _("Artists"), _("Record count"), _("Play count"), _("Play duration"), _("Play duration") + _("(seconds)"), _("Duration"), _("Duration") + _("(seconds)"), _("Album"), _("Album artists"), _("Genres"), _("Track no"), _("Disc no"), _("Year"), _("Publish date"), _("Publisher"), _("Item id"))  # noqa: E501
+        for itemId in trackCountMap:
+            item = itemMap[itemId]
+            count = trackCountMap[itemId]
+            name = ''
+            artists = ''
+            album = ''
+            album_artists = ''
+            genres = ''
+            track = None
+            disc = None
+            year = None
+            date = None
+            publisher = None
+            duration = None
+            if 'type' in item:
+                name = item['Name']
+                artists = item['Artists']
+                album = item['Album']
+                album_artists = item['AlbumArtists']
+                genres = item['Genres']
+                track = item['IndexNumber']
+                disc = item['ParentIndexNumber']
+                duration = item['RunTimeTicks'] / TIME_BASE
+                year = item['ProductionYear']
+                date = item['PremiereDate']
+                publisher = item['Studios']
+            else:
+                it = ITEMNAME_PATTERN.match(item['ItemName']).groupdict()
+                name = it['track']
+                if it['album'] != NOT_KNOWN:
+                    album = it['album']
+                if it['album_artist'] != NOT_KNOWN:
+                    album_artists = it['album_artist']
+            if year and date:
+                if date.endswith("-01-01 00:00:00"):
+                    date = None
+            tr.write(name, artists, count['count'], count['play_count'], format_duration(count['duration']), count['duration'], format_duration(duration), duration, album, album_artists, genres, track, disc, year, date, publisher, itemId)  # noqa: E501
+    with CSVFile(join(output, 'artist.csv')) as ar:
+        ar.write(_("Name"), _("Record count"), _("Play count"), _("Play duration"), _("Play duration") + _("(seconds)"))  # noqa: E501
+        for artist in artistCountMap:
+            count = artistCountMap[artist]
+            ar.write(artist, count['count'], count['play_count'], format_duration(count['duration']), count['duration'])  # noqa: E501
+    with CSVFile(join(output, 'album_artist.csv')) as alAr:
+        alAr.write(_("Name"), _("Record count"), _("Play count"), _("Play duration"), _("Play duration") + _("(seconds)"))  # noqa: E501
+        for artist in alArtCountMap:
+            count = alArtCountMap[artist]
+            alAr.write(artist, count['count'], count['play_count'], format_duration(count['duration']), count['duration'])  # noqa: E501

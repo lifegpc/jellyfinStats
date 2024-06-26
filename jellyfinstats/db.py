@@ -21,7 +21,8 @@ class PlaybackReportingDb:
 
     def get_activitys(self, offset: int = 0, limit: int = 100,
                       itemType: str = None, userId: str = None,
-                      startTime: float = None, endTime: float = None):
+                      startTime: float = None, endTime: float = None,
+                      clientName: str = None, deviceName: str = None):
         where_sqls = []
         where_sql = ''
         args = []
@@ -37,11 +38,22 @@ class PlaybackReportingDb:
         if endTime is not None:
             where_sqls.append('DateCreated <= ?')
             args.append(format_time(endTime))
+        if clientName is not None:
+            where_sqls.append("ClientName = ?")
+            args.append(clientName)
+        if deviceName is not None:
+            where_sqls.append("DeviceName = ?")
+            args.append(deviceName)
         if len(where_sqls):
             where_sql = ' WHERE ' + " AND ".join(where_sqls)
         args.append(limit)
         args.append(offset)
         cur = self._db.execute(f"SELECT ROWID, * FROM PlaybackActivity{where_sql} LIMIT ? OFFSET ?;", args)  # noqa: E501
+        cur.row_factory = sqlite3.Row
+        return [dict(i) for i in cur.fetchall()]
+
+    def get_client_devices(self):
+        cur = self._db.execute("SELECT ClientName, DeviceName FROM PlaybackActivity GROUP BY ClientName, DeviceName;")  # noqa: E501
         cur.row_factory = sqlite3.Row
         return [dict(i) for i in cur.fetchall()]
 
@@ -54,6 +66,9 @@ class PlaybackReportingDb:
         cur = self._db.execute(f"SELECT UserId, min(DateCreated) AS MinDate, max(DateCreated) AS MaxDate FROM PlaybackActivity{where_sql} GROUP BY UserId;", args)  # noqa: E501
         cur.row_factory = sqlite3.Row
         return [dict(i) for i in cur.fetchall()]
+
+    def update_playduration(self, rowid: int, duration: int):
+        self._db.execute("UPDATE PlaybackActivity SET PlayDuration = ? WHERE rowid = ?;", [duration, rowid])  # noqa: E501
 
 
 class LibraryDb:

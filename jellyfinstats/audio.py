@@ -8,7 +8,7 @@ from datetime import datetime
 from re import compile
 from os import makedirs
 from os.path import join
-from math import floor
+from math import ceil, floor
 
 
 ITEMNAME_PATTERN = compile(r'(?P<album_artist>.*) - (?P<track>.*) \((?P<album>.*)\)')  # noqa: E501
@@ -405,3 +405,31 @@ def generate_audio_report(pdb: PlaybackReportingDb, itemMap, rowMap, albumMap,
         for artist in alArtCountMap:
             count = alArtCountMap[artist]
             alAr.write(artist, count['count'], count['play_count'], format_duration(count['duration']), count['duration'])  # noqa: E501
+
+
+def fix_audio_report_library(pdb: PlaybackReportingDb):
+    clients = pdb.get_client_devices()
+    for client in clients:
+        clientName = client['ClientName']
+        deviceName = client['DeviceName']
+        prev = None
+        offset = 0
+        data = pdb.get_activitys(offset, itemType='Audio',
+                                 clientName=clientName,
+                                 deviceName=deviceName)
+        while len(data) > 0:
+            for i in data:
+                if prev is None:
+                    prev = i
+                    continue
+                delta = ceil(parse_time(
+                    i['DateCreated']) - parse_time(prev['DateCreated']))
+                dur = prev['PlayDuration']
+                if delta < dur - 1:
+                    print(f'Change song(id={prev["rowid"]}) play duration from {dur} to {delta}')   # noqa: E501
+                    pdb.update_playduration(prev["rowid"], delta)
+                prev = i
+            offset += len(data)
+            data = pdb.get_activitys(offset, itemType='Audio',
+                                     clientName=clientName,
+                                     deviceName=deviceName)

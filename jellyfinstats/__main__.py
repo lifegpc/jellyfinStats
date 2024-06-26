@@ -1,7 +1,11 @@
 from argparse import ArgumentParser
 from os.path import join
 from . import _
-from .audio import prepare_audio_map, generate_audio_report
+from .audio import (
+    prepare_audio_map,
+    generate_audio_report,
+    fix_audio_report_library,
+)
 from .cache import IdRelativeCache
 from .config import Config
 from .db import PlaybackReportingDb, LibraryDb, JellyfinDb
@@ -15,9 +19,12 @@ p.add_argument("--jellyfin-data-dir", help=_("The path to jellyfin data director
 p.add_argument("--output-dir", help=_("The directory for output files."))
 p.add_argument("--ask-page-size", help=_("Specify maximum items to display in one page."), type=int)  # noqa: E501
 p.add_argument("--jellyfin-db", help=_("The path to jellyfin.db"))
+p.add_argument("--fix", help=_("Fix incorrect play duration."), action='store_true', default=False)  # noqa: E501
 arg = p.parse_intermixed_args()
 cfg = Config(arg.config, arg)
 with PlaybackReportingDb(cfg.playback_reporting_db) as pdb:
+    if arg.fix:
+        fix_audio_report_library(pdb)
     with LibraryDb(cfg.library_db) as ldb:
         with IdRelativeCache(cfg.output_dir) as icache:
             with JellyfinDb(cfg.jellyfin_db) as jdb:
@@ -30,4 +37,5 @@ with PlaybackReportingDb(cfg.playback_reporting_db) as pdb:
                     output = join(cfg.output_dir, 'audio', username)
                     maxDate = u['MaxDate']
                     minDate = u['MinDate']
-                    generate_audio_report(pdb, re[0], re[1], re[2], output, userid)
+                    generate_audio_report(
+                        pdb, re[0], re[1], re[2], output, userid)

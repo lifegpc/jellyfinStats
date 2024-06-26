@@ -6,6 +6,7 @@ class PlaybackReportingDb:
     def __init__(self, fn: str):
         self._db = sqlite3.connect(fn)
         self._closed = False
+        self._changed = False
 
     def __enter__(self):
         return self
@@ -16,6 +17,8 @@ class PlaybackReportingDb:
     def close(self):
         if self._closed:
             return
+        if self._changed:
+            self._db.commit()
         self._db.close()
         self._closed = True
 
@@ -69,6 +72,7 @@ class PlaybackReportingDb:
 
     def update_playduration(self, rowid: int, duration: int):
         self._db.execute("UPDATE PlaybackActivity SET PlayDuration = ? WHERE rowid = ?;", [duration, rowid])  # noqa: E501
+        self._changed = True
 
 
 class LibraryDb:

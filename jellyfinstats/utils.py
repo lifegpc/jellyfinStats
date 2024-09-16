@@ -1,6 +1,7 @@
 from math import ceil, floor
 from datetime import datetime, timezone
 from re import compile
+from typing import Tuple
 from . import _
 from .config import Config
 
@@ -78,10 +79,13 @@ def format_time(time: float | None = None, tz=timezone.utc) -> str:
     return d.strftime('%Y-%m-%d %H:%M:%S.%f')
 
 
-def parse_time(time: str) -> float:
+def parse_datetime(time: str) -> datetime:
     re = DATETIME_RE.match(time)
-    t = datetime(int(re[1]), int(re[2]), int(re[3]), int(re[4]), int(re[5]), int(re[6]), int(re[7].ljust(6, '0')), timezone.utc)  # noqa: E501
-    return t.timestamp()
+    return datetime(int(re[1]), int(re[2]), int(re[3]), int(re[4]), int(re[5]), int(re[6]), int(re[7].ljust(6, '0')), timezone.utc)  # noqa: E501
+
+
+def parse_time(time: str) -> float:
+    return parse_datetime(time).timestamp()
 
 
 def convert_uid(uid: str) -> str:
@@ -103,3 +107,8 @@ def format_duration(duration: float | None) -> str:
     min = str(floor(duration / 60)).rjust(2, "0")
     sec = str(duration % 60).rjust(2, "0")
     return f"{re}{min}:{sec}"
+
+
+def gen_year_range(year: int, utc: bool = False) -> Tuple[float, float]:
+    tz = timezone.utc if utc else None
+    return (datetime(year, 1, 1, tzinfo=tz).timestamp(), datetime(year, 12, 31, 23, 59, 59, 999999, tzinfo=tz).timestamp())  # noqa: E501

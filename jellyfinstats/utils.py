@@ -1,4 +1,5 @@
 from math import ceil, floor
+from collections import namedtuple
 from datetime import datetime, timezone
 from re import compile
 from typing import Tuple
@@ -7,6 +8,7 @@ from .config import Config
 
 
 DATETIME_RE = compile(r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2}).(\d{0,6})')  # noqa: E501
+YEARMONTH_RE = compile(r'^(\d{4})[-/]?(\d{2})$')
 
 
 def ask_choice(cfg: Config, choices: list, prompt=_("Please choose: "),
@@ -111,4 +113,26 @@ def format_duration(duration: float | None) -> str:
 
 def gen_year_range(year: int, utc: bool = False) -> Tuple[float, float]:
     tz = timezone.utc if utc else None
-    return (datetime(year, 1, 1, tzinfo=tz).timestamp(), datetime(year, 12, 31, 23, 59, 59, 999999, tzinfo=tz).timestamp())  # noqa: E501
+    return (datetime(year, 1, 1, tzinfo=tz).timestamp(), datetime(year, 12, 31, 23, 59, 59, 999999, tz).timestamp())  # noqa: E501
+
+
+YearMonth = namedtuple('YearMonth', ['year', 'month'])
+YearMonth.__add__ = lambda a, b: YearMonth(floor((a.year * 12 + a.month + b - 1) / 12), (a.year * 12 + a.month + b - 1) % 12 + 1)   # noqa: E501
+YearMonth.__iadd__ = lambda a, b: YearMonth(floor((a.year * 12 + a.month + b - 1) / 12), (a.year * 12 + a.month + b - 1) % 12 + 1)   # noqa: E501
+
+
+def parse_year_month(time: str) -> YearMonth:
+    re = YEARMONTH_RE.match(time)
+    if re is None:
+        raise ValueError("Invalid year month: " + time)
+    month = int(re[2])
+    if month < 1 or month > 12:
+        raise ValueError(f"Invalid month: {month}")
+    return YearMonth(int(re[1]), month)
+
+
+def gen_month_range(month: YearMonth,
+                    utc: bool = False) -> Tuple[float, float]:
+    tz = timezone.utc if utc else None
+    n = month + 1
+    return (datetime(month.year, month.month, 1, tzinfo=tz).timestamp(), datetime(n.year, n.month, 1, tzinfo=tz).timestamp() - 1e-6)  # noqa: E501

@@ -9,7 +9,13 @@ from .audio import (
 from .cache import IdRelativeCache
 from .config import Config
 from .db import PlaybackReportingDb, LibraryDb, JellyfinDb
-from .utils import gen_year_range, parse_datetime
+from .utils import (
+    YearMonth,
+    gen_month_range,
+    gen_year_range,
+    parse_datetime,
+    parse_year_month,
+)
 
 
 p = ArgumentParser(prog="jellyfinstats")
@@ -32,6 +38,12 @@ audio_year.add_argument('year', action='extend', nargs='*', help=_("Generate yea
 audio_year.add_argument('-s', '--start', help=_("The start year of range of years."), type=int)  # noqa: E501
 audio_year.add_argument('-e', '--end', help=_("The end year of range of years."), type=int)  # noqa: E501
 audio_year.add_argument('--utc', action='store_true', help=_("Use UTC time."), default=False)  # noqa: E501
+audio_month = audios.add_parser("month", help=_("Month report"))
+audio_month.add_argument('month', action='extend', nargs='*', help=_("Generate month report for specify months."), default=[], type=parse_year_month)  # noqa: E501
+audio_month.add_argument('-s', '--start', help=_("The start month of range of months."), type=parse_year_month)  # noqa: E501
+audio_month.add_argument('-e', '--end', help=_("The end month of range of months."), type=parse_year_month)  # noqa: E501
+audio_month.add_argument('--utc', action='store_true', help=_("Use UTC time."), default=False)  # noqa: E501
+audio_month.add_argument('-y', '--year', action='append', help=_("Generate month report for specify years."), default=[], type=int)  # noqa: E501
 arg = p.parse_args()
 if arg.action == 'a':
     arg.action = 'audio'
@@ -75,3 +87,26 @@ with PlaybackReportingDb(cfg.playback_reporting_db) as pdb:
                                 time = gen_year_range(year, arg.utc)
                                 toutput = join(output, str(year))
                                 generate_audio_report(pdb, re[0], re[1], re[2], toutput, userid, max(time[0], minTime.timestamp()), min(time[1], maxTime.timestamp()))  # noqa: E501
+                        elif arg.type == 'month':
+                            minTime = parse_datetime(minDate)
+                            minMonth = YearMonth(minTime.year, minTime.month)
+                            maxTime = parse_datetime(maxDate)
+                            maxMonth = YearMonth(maxTime.year, maxTime.month)
+                            month = minMonth
+                            while month <= maxMonth:
+                                if arg.year and month.year not in arg.year:
+                                    month = YearMonth(month.year + 1, 1)
+                                    continue
+                                if arg.month and month not in arg.month:
+                                    month += 1
+                                    continue
+                                if arg.start is not None and month < arg.start:
+                                    month += 1
+                                    continue
+                                if arg.end is not None and month > arg.end:
+                                    month += 1
+                                    continue
+                                time = gen_month_range(month, arg.utc)
+                                toutput = join(output, str(month.year), str(month.month).rjust(2, '0'))  # noqa: E501
+                                generate_audio_report(pdb, re[0], re[1], re[2], toutput, userid, max(time[0], minTime.timestamp()), min(time[1], maxTime.timestamp()))  # noqa: E501
+                                month += 1
